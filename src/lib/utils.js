@@ -1,7 +1,7 @@
 import matter from 'gray-matter';
 import { format, formatDistanceToNowStrict, isValid, parseISO } from 'date-fns';
 
-export const DEFAULT_BRANCH = import.meta.env.VITE_GITHUB_BRANCH || 'main';
+export const DEFAULT_BRANCH = 'main';
 export const ITEMS_PER_PAGE = 6;
 
 export function cn(...classes) {
