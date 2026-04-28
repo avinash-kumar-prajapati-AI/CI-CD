@@ -16,7 +16,7 @@ export const octokit = new Octokit();
 
 function ensureConfig() {
   if (!OWNER || !REPO) {
-    throw new Error('Missing GitHub configuration. Add VITE_GITHUB_OWNER and VITE_GITHUB_REPO.');
+    throw new Error('Missing GitHub configuration.');
   }
 }
 
