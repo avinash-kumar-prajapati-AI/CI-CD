@@ -8,9 +8,9 @@ import {
   extractTableOfContents
 } from './utils';
 
-export const OWNER = import.meta.env.VITE_GITHUB_OWNER || '';
-export const REPO = import.meta.env.VITE_GITHUB_REPO || '';
-export const BRANCH = DEFAULT_BRANCH;
+export const OWNER = 'avinash-kumar-prajapati-AI';
+export const REPO = 'CI-CD';
+export const BRANCH = 'main';
 
 export const octokit = new Octokit();
 
