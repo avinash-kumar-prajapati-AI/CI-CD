@@ -9,7 +9,7 @@ import {
 } from './utils';
 
 export const OWNER = 'avinash-kumar-prajapati-AI';
-export const REPO = 'CI-CD';
+export const REPO = 'articles';
 export const BRANCH = 'main';
 
 export const octokit = new Octokit();
