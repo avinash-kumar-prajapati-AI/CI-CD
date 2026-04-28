@@ -1,16 +1,7 @@
-import { FolderPlus, Layers3 } from 'lucide-react';
+import { Layers3 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useAuthStore } from '../store/authStore';
 
-export function CategorySidebar({
-  categories = [],
-  activeCategory,
-  onCreateCategory,
-  collapsed = false,
-  onToggle
-}) {
-  const { isAdmin } = useAuthStore();
-
+export function CategorySidebar({ categories = [], activeCategory, collapsed = false, onToggle }) {
   return (
     <aside className="glass-card h-fit p-5">
       <div className="mb-4 flex items-center justify-between gap-3">
@@ -49,17 +40,6 @@ export function CategorySidebar({
             </Link>
           ))}
         </div>
-
-        {isAdmin ? (
-          <button
-            type="button"
-            onClick={onCreateCategory}
-            className="button-secondary mt-4 w-full justify-between"
-          >
-            <span>Add Category</span>
-            <FolderPlus className="h-4 w-4" />
-          </button>
-        ) : null}
       </div>
     </aside>
   );

@@ -1,50 +1,22 @@
 import { Octokit } from '@octokit/rest';
 import {
   DEFAULT_BRANCH,
-  buildCommitMessage,
-  buildMarkdownDocument,
   decodeBase64Unicode,
-  encodeBase64Unicode,
   getReadingTime,
   parseCommitMeta,
   parseMarkdownFile,
-  extractTableOfContents,
-  slugify
+  extractTableOfContents
 } from './utils';
 
 export const OWNER = import.meta.env.VITE_GITHUB_OWNER || '';
 export const REPO = import.meta.env.VITE_GITHUB_REPO || '';
 export const BRANCH = DEFAULT_BRANCH;
 
-export const octokit = new Octokit({
-  auth: import.meta.env.VITE_GITHUB_TOKEN || undefined
-});
+export const octokit = new Octokit();
 
 function ensureConfig() {
   if (!OWNER || !REPO) {
     throw new Error('Missing GitHub configuration. Add VITE_GITHUB_OWNER and VITE_GITHUB_REPO.');
-  }
-}
-
-async function resolveFileSha(path) {
-  try {
-    const response = await octokit.repos.getContent({
-      owner: OWNER,
-      repo: REPO,
-      path,
-      ref: BRANCH
-    });
-
-    if (Array.isArray(response.data) || response.data.type !== 'file') {
-      return null;
-    }
-
-    return response.data.sha || null;
-  } catch (error) {
-    if (error.status === 404) {
-      return null;
-    }
-    throw error;
   }
 }
 
@@ -159,100 +131,4 @@ export async function getAllArticles() {
   );
 
   return articles.sort((a, b) => new Date(b.date) - new Date(a.date));
-}
-
-export async function createCategory(folderName) {
-  ensureConfig();
-  const category = slugify(folderName);
-  if (!category) {
-    throw new Error('Category name is required.');
-  }
-
-  const categoryPlaceholderPath = `${category}/.gitkeep`;
-  const existingSha = await resolveFileSha(categoryPlaceholderPath);
-
-  await octokit.repos.createOrUpdateFileContents({
-    owner: OWNER,
-    repo: REPO,
-    path: categoryPlaceholderPath,
-    message: buildCommitMessage(['category'], `Created category ${category}`),
-    content: encodeBase64Unicode('placeholder'),
-    branch: BRANCH,
-    ...(existingSha ? { sha: existingSha } : {})
-  });
-
-  return category;
-}
-
-export async function saveArticle({
-  title,
-  description,
-  coverImage,
-  date,
-  body,
-  tags,
-  category,
-  slug,
-  currentSha,
-  originalPath
-}) {
-  ensureConfig();
-  const finalCategory = slugify(category);
-  const finalSlug = slugify(slug || title);
-
-  if (!finalCategory || !finalSlug) {
-    throw new Error('Category and slug are required.');
-  }
-
-  const path = `${finalCategory}/${finalSlug}.md`;
-  const content = buildMarkdownDocument({ title, description, coverImage, date, body });
-  const message = buildCommitMessage(tags, description);
-  const resolvedSha = currentSha || (await resolveFileSha(path));
-
-  await octokit.repos.createOrUpdateFileContents({
-    owner: OWNER,
-    repo: REPO,
-    path,
-    message,
-    content: encodeBase64Unicode(content),
-    branch: BRANCH,
-    ...(resolvedSha ? { sha: resolvedSha } : {})
-  });
-
-  if (originalPath && originalPath !== path) {
-    await deleteArticle({
-      path: originalPath,
-      message: buildCommitMessage(tags, `Removed moved article ${originalPath}`)
-    });
-  }
-
-  return getArticleByPath(path);
-}
-
-export async function deleteArticle({ path, sha, message }) {
-  ensureConfig();
-  let resolvedSha = sha;
-  if (!resolvedSha) {
-    const file = await octokit.repos.getContent({
-      owner: OWNER,
-      repo: REPO,
-      path,
-      ref: BRANCH
-    });
-    if (Array.isArray(file.data) || file.data.type !== 'file') {
-      throw new Error('Could not resolve file sha for deletion.');
-    }
-    resolvedSha = file.data.sha;
-  }
-
-  await octokit.repos.deleteFile({
-    owner: OWNER,
-    repo: REPO,
-    path,
-    sha: resolvedSha,
-    message: message || buildCommitMessage(['delete'], `Deleted ${path}`),
-    branch: BRANCH
-  });
-
-  return true;
 }

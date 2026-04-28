@@ -7,14 +7,13 @@ import { ErrorBoundary } from '../components/ErrorBoundary';
 import { ErrorState } from '../components/ErrorState';
 import { SectionHeading } from '../components/SectionHeading';
 import { Skeleton } from '../components/Skeleton';
-import { useAllArticlesQuery, useArticlesFeed, useCategoriesQuery, useCreateCategoryMutation } from '../hooks/useGitHubBlog';
+import { useAllArticlesQuery, useArticlesFeed, useCategoriesQuery } from '../hooks/useGitHubBlog';
 
 export function CategoryPage() {
   const { category } = useParams();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const categoriesQuery = useCategoriesQuery();
   const articlesQuery = useAllArticlesQuery();
-  const createCategoryMutation = useCreateCategoryMutation();
   const feedQuery = useArticlesFeed({ category });
   const categoryArticles = feedQuery.data?.pages.flatMap((page) => page.items) || [];
 
@@ -25,13 +24,6 @@ export function CategoryPage() {
       .forEach((article) => article.tags.forEach((tag) => unique.add(tag)));
     return Array.from(unique).sort();
   }, [articlesQuery.data, category]);
-
-  function handleCreateCategory() {
-    const value = window.prompt('Enter the new category folder name');
-    if (value) {
-      createCategoryMutation.mutate(value);
-    }
-  }
 
   return (
     <div className="container-shell section-shell">
@@ -51,7 +43,6 @@ export function CategoryPage() {
             <CategorySidebar
               categories={categoriesQuery.data}
               activeCategory={category}
-              onCreateCategory={handleCreateCategory}
               collapsed={sidebarCollapsed}
               onToggle={() => setSidebarCollapsed((value) => !value)}
             />

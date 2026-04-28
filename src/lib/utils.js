@@ -1,7 +1,6 @@
 import matter from 'gray-matter';
 import { format, formatDistanceToNowStrict, isValid, parseISO } from 'date-fns';
 
-export const AUTH_SESSION_KEY = 'gitblog-admin-session';
 export const DEFAULT_BRANCH = import.meta.env.VITE_GITHUB_BRANCH || 'main';
 export const ITEMS_PER_PAGE = 6;
 
@@ -22,14 +21,6 @@ export function normalizeTags(tags = []) {
     .map((tag) => String(tag).trim())
     .filter(Boolean)
     .map((tag) => tag.toLowerCase());
-}
-
-export function buildCommitMessage(tags = [], description = '') {
-  const serializedTags = normalizeTags(tags)
-    .map((tag) => `'${tag}'`)
-    .join(',');
-  const safeDescription = String(description).replace(/'/g, '');
-  return `tags:[${serializedTags}] | des:'${safeDescription}'`;
 }
 
 export function parseCommitMeta(message = '') {
@@ -54,15 +45,6 @@ export function decodeBase64Unicode(content = '') {
   return new TextDecoder().decode(bytes);
 }
 
-export function encodeBase64Unicode(content = '') {
-  const bytes = new TextEncoder().encode(content);
-  let binary = '';
-  bytes.forEach((byte) => {
-    binary += String.fromCharCode(byte);
-  });
-  return window.btoa(binary);
-}
-
 export function parseMarkdownFile(raw = '') {
   const { data, content } = matter(raw);
   return {
@@ -74,21 +56,6 @@ export function parseMarkdownFile(raw = '') {
     },
     body: content.trim()
   };
-}
-
-export function buildMarkdownDocument({ title, date, description, coverImage, body }) {
-  const frontmatter = [
-    '---',
-    `title: "${String(title || '').replace(/"/g, '\\"')}"`,
-    `date: "${date}"`,
-    `description: "${String(description || '').replace(/"/g, '\\"')}"`,
-    `coverImage: "${String(coverImage || '').replace(/"/g, '\\"')}"`,
-    '---',
-    '',
-    body || ''
-  ];
-
-  return frontmatter.join('\n');
 }
 
 export function safeFormatDate(dateValue) {
@@ -150,11 +117,4 @@ export function getRecommendations(currentArticle, articles = []) {
     .sort((a, b) => b.score - a.score || new Date(b.article.date) - new Date(a.article.date))
     .slice(0, 3)
     .map((entry) => entry.article);
-}
-
-export async function sha256(value) {
-  const buffer = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
-  return Array.from(new Uint8Array(buffer))
-    .map((byte) => byte.toString(16).padStart(2, '0'))
-    .join('');
 }

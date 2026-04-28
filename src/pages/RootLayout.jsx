@@ -3,25 +3,20 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Outlet, useLocation } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
-import { AdminLoginModal } from '../components/AdminLoginModal';
-import { useAuthStore } from '../store/authStore';
 import { useThemeStore } from '../store/themeStore';
 
 export function RootLayout() {
   const location = useLocation();
   const outlet = <Outlet />;
-  const { restoreSession } = useAuthStore();
   const { hydrateTheme } = useThemeStore();
 
   useEffect(() => {
-    restoreSession();
     hydrateTheme();
-  }, [hydrateTheme, restoreSession]);
+  }, [hydrateTheme]);
 
   return (
     <div className="min-h-screen">
       <Navbar />
-      <AdminLoginModal />
       <AnimatePresence mode="wait">
         <motion.main
           key={location.pathname}

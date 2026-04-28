@@ -4,10 +4,8 @@ import { HomePage } from './pages/HomePage';
 import { BlogPage } from './pages/BlogPage';
 import { CategoryPage } from './pages/CategoryPage';
 import { ArticlePage } from './pages/ArticlePage';
-import { EditorPage } from './pages/EditorPage';
 import { SearchPage } from './pages/SearchPage';
 import { NotFoundPage } from './pages/NotFoundPage';
-import { AdminRoute } from './routes/AdminRoute';
 
 export const router = createBrowserRouter([
   {
@@ -26,14 +24,6 @@ export const router = createBrowserRouter([
             element: <BlogPage />
           },
           {
-            path: 'new',
-            element: (
-              <AdminRoute>
-                <EditorPage mode="create" />
-              </AdminRoute>
-            )
-          },
-          {
             path: ':category',
             children: [
               {
@@ -42,20 +32,7 @@ export const router = createBrowserRouter([
               },
               {
                 path: ':slug',
-                children: [
-                  {
-                    index: true,
-                    element: <ArticlePage />
-                  },
-                  {
-                    path: 'edit',
-                    element: (
-                      <AdminRoute>
-                        <EditorPage mode="edit" />
-                      </AdminRoute>
-                    )
-                  }
-                ]
+                element: <ArticlePage />
               }
             ]
           }

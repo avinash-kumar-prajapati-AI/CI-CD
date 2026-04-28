@@ -1,43 +1,25 @@
-import { useMemo, useState } from 'react';
-import { CalendarDays, Clock3, FilePenLine, Trash2 } from 'lucide-react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useMemo } from 'react';
+import { CalendarDays, Clock3 } from 'lucide-react';
+import { useParams } from 'react-router-dom';
 import { MarkdownRenderer } from '../components/MarkdownRenderer';
 import { RecommendationList } from '../components/RecommendationList';
-import { DeleteConfirmModal } from '../components/DeleteConfirmModal';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { ErrorState } from '../components/ErrorState';
 import { SectionHeading } from '../components/SectionHeading';
 import { Skeleton } from '../components/Skeleton';
-import { useAllArticlesQuery, useArticleQuery, useDeleteArticleMutation } from '../hooks/useGitHubBlog';
+import { useAllArticlesQuery, useArticleQuery } from '../hooks/useGitHubBlog';
 import { getRecommendations, safeFormatDate } from '../lib/utils';
-import { useAuthStore } from '../store/authStore';
 
 export function ArticlePage() {
-  const navigate = useNavigate();
   const { category, slug } = useParams();
   const path = `${category}/${slug}.md`;
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const { isAdmin } = useAuthStore();
   const articleQuery = useArticleQuery(path);
   const allArticlesQuery = useAllArticlesQuery();
-  const deleteMutation = useDeleteArticleMutation();
 
   const recommendations = useMemo(
     () => getRecommendations(articleQuery.data, allArticlesQuery.data || []),
     [allArticlesQuery.data, articleQuery.data]
   );
-
-  async function handleDelete() {
-    try {
-      await deleteMutation.mutateAsync({
-        path,
-        sha: articleQuery.data?.sha
-      });
-      navigate('/blog');
-    } finally {
-      setDeleteOpen(false);
-    }
-  }
 
   return (
     <div className="container-shell section-shell">
@@ -95,28 +77,6 @@ export function ArticlePage() {
                     </div>
                   </div>
 
-                  {isAdmin ? (
-                    <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                      <Link
-                        to={`/blog/${category}/${slug}/edit`}
-                        className="button-secondary justify-between sm:w-auto"
-                      >
-                        <span>Edit article</span>
-                        <FilePenLine className="h-4 w-4" />
-                      </Link>
-                      <button
-                        type="button"
-                        onClick={() => setDeleteOpen(true)}
-                        className="button-danger sm:w-auto"
-                      >
-                        <span className="inline-flex items-center gap-2">
-                          <Trash2 className="h-4 w-4" />
-                          Delete
-                        </span>
-                      </button>
-                    </div>
-                  ) : null}
-
                   {articleQuery.data.coverImage ? (
                     <div className="mt-8 overflow-hidden rounded-3xl border border-[var(--glass-border)]">
                       <img
@@ -163,14 +123,6 @@ export function ArticlePage() {
                 </div>
               </aside>
             </article>
-
-            <DeleteConfirmModal
-              open={deleteOpen}
-              title={articleQuery.data.title}
-              loading={deleteMutation.isPending}
-              onCancel={() => setDeleteOpen(false)}
-              onConfirm={handleDelete}
-            />
           </>
         )}
       </ErrorBoundary>

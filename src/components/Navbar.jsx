@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { Lock, LogOut, Menu, MoonStar, Search, SunMedium, Unlock, X } from 'lucide-react';
+import { Menu, MoonStar, Search, SunMedium, X } from 'lucide-react';
 import { SITE_PROFILE } from '../lib/constants';
 import { cn } from '../lib/utils';
-import { useAuthStore } from '../store/authStore';
 import { useThemeStore } from '../store/themeStore';
 
 const navItems = [
@@ -17,7 +16,6 @@ export function Navbar() {
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { isAdmin, openLogin, logout } = useAuthStore();
   const { theme, toggleTheme } = useThemeStore();
 
   useEffect(() => {
@@ -94,18 +92,6 @@ export function Navbar() {
 
             <button
               type="button"
-              onClick={isAdmin ? logout : openLogin}
-              className={cn(
-                'button-secondary w-11 rounded-full px-0',
-                isAdmin && 'text-[var(--accent-primary)]'
-              )}
-              aria-label={isAdmin ? 'Unlock admin' : 'Lock admin'}
-            >
-              {isAdmin ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
-            </button>
-
-            <button
-              type="button"
               className="button-secondary w-11 rounded-full px-0 md:hidden"
               onClick={() => setMobileOpen((value) => !value)}
               aria-label="Open menu"
@@ -149,26 +135,6 @@ export function Navbar() {
                 <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
                 {theme === 'dark' ? <SunMedium className="h-4 w-4" /> : <MoonStar className="h-4 w-4" />}
               </button>
-
-              {isAdmin ? (
-                <button
-                  type="button"
-                  onClick={logout}
-                  className="button-secondary justify-between"
-                >
-                  <span>Log out</span>
-                  <LogOut className="h-4 w-4" />
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={openLogin}
-                  className="button-primary justify-between"
-                >
-                  <span>Admin unlock</span>
-                  <Unlock className="h-4 w-4" />
-                </button>
-              )}
             </div>
           </motion.div>
         ) : null}

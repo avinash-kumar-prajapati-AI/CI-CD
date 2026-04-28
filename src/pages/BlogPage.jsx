@@ -1,22 +1,18 @@
 import { useMemo, useState } from 'react';
-import { Filter, LoaderCircle, PlusCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Filter, LoaderCircle } from 'lucide-react';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { ArticleCard } from '../components/ArticleCard';
 import { CategorySidebar } from '../components/CategorySidebar';
 import { ErrorState } from '../components/ErrorState';
 import { SectionHeading } from '../components/SectionHeading';
 import { Skeleton } from '../components/Skeleton';
-import { useAllArticlesQuery, useArticlesFeed, useCategoriesQuery, useCreateCategoryMutation } from '../hooks/useGitHubBlog';
-import { useAuthStore } from '../store/authStore';
+import { useAllArticlesQuery, useArticlesFeed, useCategoriesQuery } from '../hooks/useGitHubBlog';
 
 export function BlogPage() {
   const [activeTag, setActiveTag] = useState('');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
-  const { isAdmin } = useAuthStore();
   const categoriesQuery = useCategoriesQuery();
   const articlesQuery = useAllArticlesQuery();
-  const createCategoryMutation = useCreateCategoryMutation();
 
   const tags = useMemo(() => {
     const unique = new Set();
@@ -27,13 +23,6 @@ export function BlogPage() {
   const feedQuery = useArticlesFeed({ tag: activeTag });
   const feedItems = feedQuery.data?.pages.flatMap((page) => page.items) || [];
   const hasMore = Boolean(feedQuery.hasNextPage);
-
-  function handleCreateCategory() {
-    const value = window.prompt('Enter the new category folder name');
-    if (value) {
-      createCategoryMutation.mutate(value);
-    }
-  }
 
   return (
     <div className="container-shell section-shell">
@@ -52,7 +41,6 @@ export function BlogPage() {
           ) : (
             <CategorySidebar
               categories={categoriesQuery.data}
-              onCreateCategory={handleCreateCategory}
               collapsed={sidebarCollapsed}
               onToggle={() => setSidebarCollapsed((value) => !value)}
             />
@@ -66,15 +54,6 @@ export function BlogPage() {
                 <Filter className="theme-accent h-4 w-4" />
                 <span className="theme-title font-medium">Filter by tag</span>
               </div>
-              {isAdmin ? (
-                <Link
-                  to="/blog/new"
-                  className="button-primary justify-between sm:w-auto"
-                >
-                  <span>New article</span>
-                  <PlusCircle className="h-4 w-4" />
-                </Link>
-              ) : null}
             </div>
             <div className="flex flex-wrap gap-2">
               <button
